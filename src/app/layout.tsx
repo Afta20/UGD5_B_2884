@@ -16,7 +16,7 @@ export default function RootLayout({ children }: {
       <body className="min-h-screen flex items-center justify-center p-4">
         {children}
         <ToastContainer
-          position="top-center"
+          position="top-right"
           autoClose={5000}
           hideProgressBar={false}
           newestOnTop={false}

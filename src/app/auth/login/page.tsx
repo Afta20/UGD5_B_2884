@@ -1,17 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthFromWrapper from '../../../components/AuthFromWrapper';
 import SocialAuth from '../../../components/SocialAuth';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
+import { RefreshCcw } from 'lucide-react'; 
 
 interface LoginFormData {
   email: string;
   password: string;
   captchaInput: string;
-  remberMe?: boolean;
 }
 
 interface ErrorObject {
@@ -20,17 +20,32 @@ interface ErrorObject {
   captcha?: string;
 }
 
-const DEFAULT_CAPTCHA = 'AbCdEf';
-
 const LoginPage = () => {
   const router = useRouter();
+  
+  // State Utama
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
     captchaInput: ''
   });
-
   const [errors, setErrors] = useState<ErrorObject>({});
+  const [attempts, setAttempts] = useState(3); // Sisa kesempatan 
+  const [captcha, setCaptcha] = useState('');
+
+  // Fungsi generate captcha acak 
+  const generateCaptcha = () => {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 6; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setCaptcha(result);
+  };
+
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -40,106 +55,129 @@ const LoginPage = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     const newErrors: ErrorObject = {};
+
+    // Validasi Dasar 
     if (!formData.email.trim()) newErrors.email = 'Email tidak boleh kosong';
     if (!formData.password.trim()) newErrors.password = 'Password tidak boleh kosong';
+    
+    // Validasi Captcha 
     if (!formData.captchaInput.trim()) {
       newErrors.captcha = 'Captcha belum diisi';
-    } else if (formData.captchaInput !== DEFAULT_CAPTCHA) {
+    } else if (formData.captchaInput !== captcha) {
       newErrors.captcha = 'Captcha salah';
     }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      toast.error('Login Gagal!', { theme: 'dark', position: 'top-right' });
+      handleFailure();
       return;
     }
 
-    toast.success('Login Berhasil!', { theme: 'dark', position: 'top-right' });
+    
+    const userNPM = "241712884"; 
+    if (formData.email !== `${userNPM}@gmail.com` || formData.password !== userNPM) {
+      handleFailure();
+      return;
+    }
+
+    // Login Berhasil 
+    toast.success('Login Berhasil!', { theme: 'dark' });
+    localStorage.setItem('isLoggedIn', 'true'); // Simpan status login untuk proteksi halaman
     router.push('/home');
+  };
+
+  const handleFailure = () => {
+    const nextAttempts = Math.max(0, attempts - 1);
+    setAttempts(nextAttempts);
+    
+    if (nextAttempts === 0) {
+      toast.error('Login Gagal! Kesempatan habis.', { theme: 'dark' },); 
+    } else {
+      toast.error(`Login Gagal! Sisa kesempatan: ${nextAttempts}`, { theme: 'dark' }); 
+    }
+    generateCaptcha(); // Refresh captcha tiap gagal
+  };
+
+  const resetAttempts = () => {
+    setAttempts(3);
+    toast.info('Kesempatan login berhasil direset!', { theme: 'dark' }); 
   };
 
   return (
     <AuthFromWrapper title="Login">
-      <form onSubmit={handleSubmit} className="space-y-5 w-full">
-        <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-medium text-gray-700">Email</label>
+      <div className="text-center mb-4">
+        <p className="text-sm text-gray-500">Sisa kesempatan: {attempts}</p> 
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4 w-full">
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-gray-700">Email</label>
           <input
-            id="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className={`w-full px-4 py-2.5 rounded-lg border ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
-            placeholder="Masukan email"
+            className={`w-full px-4 py-2 rounded-lg border ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+            placeholder="npm@gmail.com"
           />
-          {errors.email && <p className="text-red-600 text-sm italic mt-1">{errors.email}</p>}
+          {errors.email && <p className="text-red-600 text-xs italic">{errors.email}</p>}
         </div>
 
-        <div className="space-y-2">
-          <label htmlFor="password" className="text-sm font-medium text-gray-700">Password</label>
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-gray-700">Password</label>
           <input
-            id="password"
             type="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
-            className={`w-full px-4 py-2.5 rounded-lg border ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
-            placeholder="Masukan password"
+            className={`w-full px-4 py-2 rounded-lg border ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
+            placeholder="Masukan password (NPM)"
           />
-          {errors.password && <p className="text-red-600 text-sm italic mt-1">{errors.password}</p>}
+          {errors.password && <p className="text-red-600 text-xs italic">{errors.password}</p>}
         </div>
 
-        <div className="flex items-center justify-between mt-2">
-          <label className="flex items-center text-sm text-gray-700">
-            <input
-              type="checkbox"
-              name="remberMe"
-              checked={formData.remberMe || false}
-              onChange={(e) => 
-                setFormData(prev => ({ ...prev, remberMe: e.target.checked }))
-              }
-              className="mr-2 h-4 w-4 rounded border-gray-300"
-            />
-            Ingat Saya
-          </label>
-          <Link href="/auth/forgot-password" className="text-blue-600 hover:text-blue-800 text-sm font-semibold">
-            Forgot Password?
-          </Link>
-        </div>
-
-        <div className="space-y-2">
-          <div className="flex items-center space-x-3">
-            <span className="text-sm font-medium text-gray-700">Captcha:</span>
-            <span className="font-mono text-lg font-bold text-gray-800 bg-gray-100 px-3 py-1.5 rounded">
-              {DEFAULT_CAPTCHA}
-            </span>
+        <div className="space-y-1">
+          <div className="flex items-center justify-between bg-gray-100 p-2 rounded">
+            <span className="font-mono font-bold tracking-widest">{captcha}</span> 
+            <button type="button" onClick={generateCaptcha} className="text-blue-600">
+              <RefreshCcw size={16} />
+            </button>
           </div>
           <input
-            type="text"
             name="captchaInput"
             value={formData.captchaInput}
             onChange={handleChange}
-            className={`w-full px-4 py-2.5 rounded-lg border ${errors.captcha ? 'border-red-500' : 'border-gray-300'}`}
-            placeholder="Masukan captcha"
+            className={`w-full px-4 py-2 rounded-lg border ${errors.captcha ? 'border-red-500' : 'border-gray-300'}`}
+            placeholder="Ketik captcha di atas"
           />
-          {errors.captcha && <p className="text-red-600 text-sm italic mt-1">{errors.captcha}</p>}
+          {errors.captcha && <p className="text-red-600 text-xs italic">{errors.captcha}</p>}
         </div>
 
         <button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg"
+          disabled={attempts === 0}
+          className={`w-full font-semibold py-2 px-4 rounded-lg transition-colors ${
+            attempts === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'
+          }`}
         >
           Sign In
-        </button>
+        </button> 
+
+        <button
+          type="button"
+          onClick={resetAttempts}
+          disabled={attempts > 0}
+          className={`w-full font-semibold py-2 px-4 rounded-lg transition-colors ${
+            attempts > 0 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 text-white'
+          }`}
+        >
+          Reset Kesempatan
+        </button> 
 
         <SocialAuth />
 
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Tidak punya akun?{' '}
-          <Link href="/auth/register" className="text-blue-600 hover:text-blue-800 font-semibold">
-            Daftar
-          </Link>
+        <p className="text-center text-sm text-gray-600 mt-4">
+          Tidak punya akun? <Link href="/auth/register" className="text-blue-600 font-bold">Daftar</Link>
         </p>
       </form>
     </AuthFromWrapper>
