@@ -1,5 +1,7 @@
 'use client';
 import React, { useState, useEffect } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const COLORS = [
     { name: 'Merah', hex: '#EF4444' },
@@ -26,10 +28,23 @@ const Game3 = () => {
 
     const handleGuess = (hex: string) => {
         if (hex === target.hex) {
-            setScore(prev => prev + 1);
+            setScore(prev => {
+                toast.success('Tebakan benar! Skor bertambah.');
+                return prev + 1;
+            });
         } else {
-            setScore(Math.max(0, score - 1));
+            setScore(prev => {
+                const nextScore = Math.max(0, prev - 1);
+                toast.error('Salah! Skor dikurangi.');
+                return nextScore;
+            });
         }
+        generateRound();
+    };
+
+    const handleReset = () => {
+        setScore(0);
+        toast.warn('Skor di-reset. Coba lagi ya!');
         generateRound();
     };
 
@@ -60,8 +75,21 @@ const Game3 = () => {
 
             <div className="flex justify-between items-center bg-purple-600 text-white px-4 py-2 rounded-lg">
                 <span className="text-sm font-bold">Skor: {score}</span>
-                <button onClick={() => setScore(0)} className="text-[10px] underline">Reset</button>
+                <button onClick={handleReset} className="text-[10px] underline">Reset</button>
             </div>
+
+            <ToastContainer
+                position="top-center"
+                autoClose={1500}
+                hideProgressBar
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="colored"
+            />
         </div>
     );
 };
