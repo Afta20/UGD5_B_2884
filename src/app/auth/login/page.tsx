@@ -36,6 +36,8 @@ const LoginPage = () => {
   const [captcha, setCaptcha] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  const npmEmailPattern = /^241712884@gmail\.com$/;
+
   const generateCaptcha = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -65,14 +67,14 @@ const LoginPage = () => {
     // Validasi Dasar sesuai PDF
     if (!formData.email.trim()) {
         newErrors.email = 'Email tidak boleh kosong';
-    } else if (!formData.email.includes('241712884')) {
-        newErrors.email = 'Email harus sesuai dengan format npm kalian (cth. 1905@gmail.com)';
+    } else if (!npmEmailPattern.test(formData.email.trim())) {
+        newErrors.email = 'Email harus sesuai dengan format 241712884@gmail.com';
     }
 
     if (!formData.password.trim()) {
         newErrors.password = 'Password tidak boleh kosong';
     } else if (formData.password !== '241712884') {
-        newErrors.password = 'Password harus sesuai dengan format npm kalian (cth. 220711905)';
+        newErrors.password = 'Password harus sesuai dengan format npm kalian (cth. 241712884)';
     }
     
     if (!formData.captchaInput.trim()) {
