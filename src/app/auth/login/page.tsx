@@ -64,17 +64,25 @@ const LoginPage = () => {
     e.preventDefault();
     const newErrors: ErrorObject = {};
 
-    // Validasi Dasar sesuai PDF
-    if (!formData.email.trim()) {
+    // Validasi dasar: email harus diisi, password harus diisi,
+    // dan bila salah satu kredensial tidak valid, berikan error umum pada keduanya.
+    const emailValue = formData.email.trim();
+    const passwordValue = formData.password.trim();
+    const emailValid = emailValue && npmEmailPattern.test(emailValue);
+    const passwordValid = passwordValue && formData.password === '241712884';
+
+    if (!emailValue) {
         newErrors.email = 'Email tidak boleh kosong';
-    } else if (!npmEmailPattern.test(formData.email.trim())) {
-        newErrors.email = 'Email harus sesuai dengan format 241712884@gmail.com';
     }
 
-    if (!formData.password.trim()) {
+    if (!passwordValue) {
         newErrors.password = 'Password tidak boleh kosong';
-    } else if (formData.password !== '241712884') {
-        newErrors.password = 'Password harus sesuai dengan format npm kalian (cth. 241712884)';
+    }
+
+    if (emailValue && passwordValue && (!emailValid || !passwordValid)) {
+        const genericCredentialError = 'Email atau password salah';
+        newErrors.email = genericCredentialError;
+        newErrors.password = genericCredentialError;
     }
     
     if (!formData.captchaInput.trim()) {
