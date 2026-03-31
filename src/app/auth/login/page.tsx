@@ -6,7 +6,7 @@ import AuthFromWrapper from '../../../components/AuthFromWrapper';
 import SocialAuth from '../../../components/SocialAuth';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
-import { RefreshCcw } from 'lucide-react';
+import { RefreshCcw, Eye, EyeOff } from 'lucide-react';
 
 interface LoginFormData {
   email: string;
@@ -34,6 +34,7 @@ const LoginPage = () => {
   const [errors, setErrors] = useState<ErrorObject>({});
   const [attempts, setAttempts] = useState(3);
   const [captcha, setCaptcha] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const generateCaptcha = () => {
     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -124,14 +125,23 @@ const LoginPage = () => {
         {/* Password */}
         <div className="space-y-1">
           <label className="text-sm font-medium text-gray-700">Password</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            className={`w-full px-4 py-2 rounded-lg border ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
-            placeholder="Masukan password"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className={`w-full px-4 py-2 rounded-lg border ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
+              placeholder="Masukan password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(prev => !prev)}
+              className="absolute right-3 top-2.5 text-gray-500"
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
           {errors.password && <p className="text-red-600 text-[10px] italic">{errors.password}</p>}
         </div>
 
