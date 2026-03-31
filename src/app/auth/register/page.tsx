@@ -15,6 +15,7 @@ type RegisterFormData = {
   nomorTelp: string;
   password: string;
   confirmPassword: string;
+  captcha: string;
 };
 
 const RegisterPage = () => {
@@ -22,7 +23,6 @@ const RegisterPage = () => {
   const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterFormData>();
   
   const [captcha, setCaptcha] = useState('');
-  const [captchaInput, setCaptchaInput] = useState('');
   const [strength, setStrength] = useState(0);
   const [showPass, setShowPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
@@ -58,11 +58,6 @@ const RegisterPage = () => {
   const onSubmit = (data: RegisterFormData) => {
     if (data.password !== data.confirmPassword) {
       toast.error('Konfirmasi password tidak cocok', { theme: 'dark' });
-      return;
-    }
-
-    if (captchaInput !== captcha) {
-      toast.error('Harus sesuai dengan captcha yang ditampilkan', { theme: 'dark' });
       return;
     }
 
@@ -173,11 +168,14 @@ const RegisterPage = () => {
             <button type="button" onClick={generateCaptcha} className="text-blue-600"><RefreshCcw size={16} /></button>
           </div>
           <input
-            value={captchaInput}
-            onChange={(e) => setCaptchaInput(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg border border-gray-300"
+            {...register('captcha', {
+              required: 'Captcha wajib diisi',
+              validate: value => value === captcha || 'Harus sesuai dengan captcha yang ditampilkan'
+            })}
+            className={`w-full px-4 py-2 rounded-lg border ${errors.captcha ? 'border-red-500' : 'border-gray-300'}`}
             placeholder="Masukkan captcha"
           />
+          {errors.captcha && <p className="text-red-600 text-xs italic">{errors.captcha.message}</p>}
         </div>
 
         <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg">
