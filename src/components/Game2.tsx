@@ -5,7 +5,7 @@ const Game2 = () => {
     const [score, setScore] = useState(0);
     const [level, setLevel] = useState(1);
 
-    // Menggunakan useEffect untuk memantau level berdasarkan skor (Sesuai syarat PDF)
+    // Menggunakan useEffect untuk memantau level berdasarkan skor 
     useEffect(() => {
         if (score > 0 && score % 10 === 0) {
             setLevel(prev => prev + 1);

@@ -37,7 +37,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const generateCaptcha = () => {
-    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     for (let i = 0; i < 6; i++) {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -62,8 +62,18 @@ const LoginPage = () => {
     e.preventDefault();
     const newErrors: ErrorObject = {};
 
-    if (!formData.email.trim()) newErrors.email = 'Email tidak boleh kosong';
-    if (!formData.password.trim()) newErrors.password = 'Password tidak boleh kosong';
+    // Validasi Dasar sesuai PDF
+    if (!formData.email.trim()) {
+        newErrors.email = 'Email tidak boleh kosong';
+    } else if (!formData.email.includes('241712884')) {
+        newErrors.email = 'Email harus sesuai dengan format npm kalian (cth. 1905@gmail.com)';
+    }
+
+    if (!formData.password.trim()) {
+        newErrors.password = 'Password tidak boleh kosong';
+    } else if (formData.password !== '241712884') {
+        newErrors.password = 'Password harus sesuai dengan format npm kalian (cth. 220711905)';
+    }
     
     if (!formData.captchaInput.trim()) {
       newErrors.captcha = 'Captcha belum diisi';
@@ -77,12 +87,7 @@ const LoginPage = () => {
       return;
     }
 
-    const userNPM = "241712884"; 
-    if (formData.email !== `${userNPM}@gmail.com` || formData.password !== userNPM) {
-      handleFailure();
-      return;
-    }
-
+    // Login Berhasil
     toast.success('Login Berhasil!', { theme: 'dark', position: "top-right" });
     localStorage.setItem('isLoggedIn', 'true');
     router.push('/home');
@@ -92,40 +97,42 @@ const LoginPage = () => {
     const nextAttempts = Math.max(0, attempts - 1);
     setAttempts(nextAttempts);
     
+    // Notifikasi Toast di kanan atas 
     if (nextAttempts === 0) {
-      toast.error('Login Gagal! Kesempatan habis.', { theme: 'dark', position: "top-right" });
+      toast.error('Login Gagal! Kesempatan login habis.', { theme: 'dark', position: "top-right" });
     } else {
-      toast.error(`Login Gagal! Sisa kesempatan: ${nextAttempts}`, { theme: 'dark', position: "top-right" });
+      toast.error(`Login Gagal! Sisa Kesempatan: ${nextAttempts}`, { theme: 'dark', position: "top-right" });
     }
     generateCaptcha();
   };
 
   const resetAttempts = () => {
     setAttempts(3);
-    toast.info('Kesempatan login berhasil direset!', { theme: 'dark', position: "top-right" });
+    toast.success('Kesempatan login berhasil direset!', { theme: 'dark', position: "top-right" });
   };
 
   return (
     <AuthFromWrapper title="Login">
-      <div className="text-center mb-4">
-        <p className="text-sm font-medium text-gray-500">Sisa kesempatan: {attempts}</p>
+      {/* Label Sisa Kesempatan sesuai gambar  */}
+      <div className="text-center mb-6">
+        <p className="text-sm font-bold text-gray-700">Sisa Kesempatan: {attempts}</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4 w-full">
-        {/* Email */}
+      <form onSubmit={handleSubmit} className="space-y-4 w-full px-2">
+        {/* Email Field */}
         <div className="space-y-1">
           <label className="text-sm font-medium text-gray-700">Email</label>
           <input
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className={`w-full px-4 py-2 rounded-lg border ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
-            placeholder="npm@gmail.com"
+            className={`w-full px-4 py-2 rounded-lg border transition-all ${errors.email ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-200'}`}
+            placeholder="Masukkan email"
           />
-          {errors.email && <p className="text-red-600 text-[10px] italic">{errors.email}</p>}
+          {errors.email && <p className="text-red-500 text-[11px] italic leading-tight">{errors.email}</p>}
         </div>
 
-        {/* Password */}
+        {/* Password Field dengan Icon Mata  */}
         <div className="space-y-1">
           <label className="text-sm font-medium text-gray-700">Password</label>
           <div className="relative">
@@ -134,75 +141,78 @@ const LoginPage = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className={`w-full px-4 py-2 rounded-lg border ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
-              placeholder="Masukan password"
+              className={`w-full px-4 py-2 rounded-lg border transition-all ${errors.password ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-200'}`}
+              placeholder="Masukkan password"
             />
             <button
               type="button"
               onClick={() => setShowPassword(prev => !prev)}
-              className="absolute right-3 top-2.5 text-gray-500"
+              className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
             >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
             </button>
           </div>
-          {errors.password && <p className="text-red-600 text-[10px] italic">{errors.password}</p>}
+          {errors.password && <p className="text-red-500 text-[11px] italic leading-tight">{errors.password}</p>}
         </div>
 
-        {/* Remember Me & Forgot Password */}
-        <div className="flex items-center justify-between text-xs">
-          <label className="flex items-center text-gray-700">
+        {/* Remember Me & Forgot Password sesuai gambar */}
+        <div className="flex items-center justify-between text-[13px]">
+          <label className="flex items-center text-gray-600 cursor-pointer">
             <input
               type="checkbox"
               name="rememberMe"
               checked={formData.rememberMe}
               onChange={handleChange}
-              className="mr-2 h-3 w-3 rounded border-gray-300"
+              className="mr-2 h-4 w-4 rounded border-gray-300 text-blue-600"
             />
             Ingat Saya
           </label>
-          <Link href="/auth/forgot-password" className="text-blue-600 hover:underline font-semibold">
+          <Link href="/auth/forgot-password" className="text-blue-600 hover:underline font-bold">
             Forgot Password?
           </Link>
         </div>
 
-        {/* Captcha */}
-        <div className="space-y-2">
-          <div className="flex items-center space-x-3 bg-gray-50 p-2 rounded-lg border border-dashed border-gray-300">
-            <span className="font-mono font-bold tracking-widest text-lg text-gray-700 italic select-none">
-              {captcha}
-            </span>
-            <button type="button" onClick={generateCaptcha} className="text-blue-500 hover:rotate-180 transition-transform">
-              <RefreshCcw size={16} />
-            </button>
+        {/* Captcha Field  */}
+        <div className="space-y-1">
+          <div className="flex items-center space-x-3 mb-2">
+            <span className="text-sm font-medium text-gray-700">Captcha:</span>
+            <div className="flex items-center bg-gray-50 border border-gray-200 px-3 py-1 rounded shadow-sm">
+                <span className="font-mono font-bold tracking-widest text-gray-800 select-none">
+                {captcha}
+                </span>
+                <button type="button" onClick={generateCaptcha} className="ml-3 text-blue-500 hover:text-blue-700 transition-transform hover:rotate-180">
+                <RefreshCcw size={16} />
+                </button>
+            </div>
           </div>
           <input
             name="captchaInput"
             value={formData.captchaInput}
             onChange={handleChange}
-            className={`w-full px-4 py-2 rounded-lg border ${errors.captcha ? 'border-red-500' : 'border-gray-300'}`}
-            placeholder="Masukan captcha"
+            className={`w-full px-4 py-2 rounded-lg border transition-all ${errors.captcha ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-blue-200'}`}
+            placeholder="Masukkan captcha"
           />
-          {errors.captcha && <p className="text-red-600 text-[10px] italic">{errors.captcha}</p>}
+          {errors.captcha && <p className="text-red-500 text-[11px] italic leading-tight">{errors.captcha}</p>}
         </div>
 
-        {/* Submit Button */}
+        {/* Sign In Button  */}
         <button
           type="submit"
           disabled={attempts === 0}
-          className={`w-full font-bold py-2.5 px-4 rounded-lg shadow-md transition-all ${
-            attempts === 0 ? 'bg-gray-400 cursor-not-allowed opacity-50' : 'bg-blue-600 hover:bg-blue-700 text-white'
+          className={`w-full font-bold py-2.5 px-4 rounded-lg shadow transition-all ${
+            attempts === 0 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white active:scale-[0.98]'
           }`}
         >
           Sign In
         </button>
 
-        {/* Reset Button */}
+        {/* Reset Kesempatan Button  */}
         <button
           type="button"
           onClick={resetAttempts}
           disabled={attempts > 0}
           className={`w-full font-bold py-2.5 px-4 rounded-lg shadow-sm transition-all ${
-            attempts > 0 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 text-white'
+            attempts > 0 ? 'bg-gray-400 text-white opacity-60 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 text-white active:scale-[0.98]'
           }`}
         >
           Reset Kesempatan
@@ -210,7 +220,7 @@ const LoginPage = () => {
 
         <SocialAuth />
 
-        <p className="text-center text-sm text-gray-600 mt-4">
+        <p className="text-center text-sm text-gray-600 mt-6">
           Tidak punya akun? <Link href="/auth/register" className="text-blue-600 font-bold hover:underline">Daftar</Link>
         </p>
       </form>
