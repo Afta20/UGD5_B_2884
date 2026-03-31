@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useForm, type FieldErrors } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AuthFormWrapper from '../../../components/AuthFromWrapper';
@@ -55,25 +55,14 @@ const RegisterPage = () => {
     generateCaptcha();
   }, []);
 
-  const handleInvalidSubmit = (errors: FieldErrors<RegisterFormData>) => {
-    if (errors.captcha) {
-      toast.error(errors.captcha.message?.toString() || 'Harus sesuai dengan captcha yang ditampilkan', { theme: 'dark' });
-    }
-  };
-
   const onSubmit = (data: RegisterFormData) => {
-    if (data.password !== data.confirmPassword) {
-      toast.error('Konfirmasi password tidak cocok', { theme: 'dark' });
-      return;
-    }
-
     toast.success('Register Berhasil!', { theme: 'dark' });
     router.push('/auth/login');
   };
 
   return (
     <AuthFormWrapper title="Register">
-      <form onSubmit={handleSubmit(onSubmit, handleInvalidSubmit)} className="space-y-4 w-full">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 w-full">
         
         {/* Username (Min 3, Max 8) */}
         <div className="space-y-1">
@@ -157,7 +146,10 @@ const RegisterPage = () => {
           <div className="relative">
             <input
               type={showConfirmPass ? 'text' : 'password'}
-              {...register('confirmPassword', { required: 'Konfirmasi password wajib diisi' })}
+              {...register('confirmPassword', {
+                required: 'Konfirmasi password wajib diisi',
+                validate: value => value === passwordValue || 'Password tidak cocok'
+              })}
               className={`w-full px-4 py-2 rounded-lg border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'}`}
               placeholder="Ulangi password"
             />
@@ -165,6 +157,7 @@ const RegisterPage = () => {
               {showConfirmPass ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
+          {errors.confirmPassword && <p className="text-red-600 text-xs italic">{errors.confirmPassword.message}</p>}
         </div>
 
         {/* Captcha */}
