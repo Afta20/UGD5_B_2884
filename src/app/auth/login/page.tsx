@@ -107,6 +107,10 @@ const LoginPage = () => {
 
   return (
     <AuthFromWrapper title="Login">
+      <div className="text-center mb-4">
+        <p className="text-sm font-medium text-gray-500">Sisa kesempatan: {attempts}</p>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-4 w-full">
         {/* Email */}
         <div className="space-y-1">
