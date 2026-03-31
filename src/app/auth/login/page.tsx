@@ -77,8 +77,7 @@ const LoginPage = () => {
       return;
     }
 
-    // Ganti '220711905' dengan NPM aslimu
-    const userNPM = "220711905"; 
+    const userNPM = "241712884"; 
     if (formData.email !== `${userNPM}@gmail.com` || formData.password !== userNPM) {
       handleFailure();
       return;
