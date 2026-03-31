@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type FieldErrors } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AuthFormWrapper from '../../../components/AuthFromWrapper';
@@ -55,6 +55,12 @@ const RegisterPage = () => {
     generateCaptcha();
   }, []);
 
+  const handleInvalidSubmit = (errors: FieldErrors<RegisterFormData>) => {
+    if (errors.captcha) {
+      toast.error(errors.captcha.message?.toString() || 'Harus sesuai dengan captcha yang ditampilkan', { theme: 'dark' });
+    }
+  };
+
   const onSubmit = (data: RegisterFormData) => {
     if (data.password !== data.confirmPassword) {
       toast.error('Konfirmasi password tidak cocok', { theme: 'dark' });
@@ -67,7 +73,7 @@ const RegisterPage = () => {
 
   return (
     <AuthFormWrapper title="Register">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 w-full">
+      <form onSubmit={handleSubmit(onSubmit, handleInvalidSubmit)} className="space-y-4 w-full">
         
         {/* Username (Min 3, Max 8) */}
         <div className="space-y-1">
