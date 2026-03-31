@@ -62,7 +62,7 @@ const RegisterPage = () => {
     }
 
     if (captchaInput !== captcha) {
-      toast.error('Captcha salah', { theme: 'dark' });
+      toast.error('Harus sesuai dengan captcha yang ditampilkan', { theme: 'dark' });
       return;
     }
 
