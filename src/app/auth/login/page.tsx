@@ -64,26 +64,38 @@ const LoginPage = () => {
     e.preventDefault();
     const newErrors: ErrorObject = {};
 
-    // Validasi dasar: email harus diisi, password harus diisi,
-    // dan bila salah satu kredensial tidak valid, berikan error umum pada keduanya.
+    // Validasi dasar: email dan password harus benar.
     const emailValue = formData.email.trim();
     const passwordValue = formData.password.trim();
     const emailValid = emailValue && npmEmailPattern.test(emailValue);
     const passwordValid = passwordValue && formData.password === '241712884';
 
+    let emailError: string | undefined;
+    let passwordError: string | undefined;
+
     if (!emailValue) {
-        newErrors.email = 'Email tidak boleh kosong';
+      emailError = 'Email tidak boleh kosong';
+    } else if (!emailValid) {
+      emailError = 'Email harus sesuai dengan format npm kalian (cth. 1905@gmail.com)';
     }
 
     if (!passwordValue) {
-        newErrors.password = 'Password tidak boleh kosong';
+      passwordError = 'Password tidak boleh kosong';
+    } else if (!passwordValid) {
+      passwordError = 'Password harus sesuai dengan format npm kalian (cth. 241712884)';
     }
 
     if (emailValue && passwordValue && (!emailValid || !passwordValid)) {
-        const genericCredentialError = 'Email atau password salah';
-        newErrors.email = genericCredentialError;
-        newErrors.password = genericCredentialError;
+      if (!emailError) {
+        emailError = 'Email harus sesuai dengan format npm kalian (cth. 1905@gmail.com)';
+      }
+      if (!passwordError) {
+        passwordError = 'Password harus sesuai dengan format npm kalian (cth. 241712884)';
+      }
     }
+
+    if (emailError) newErrors.email = emailError;
+    if (passwordError) newErrors.password = passwordError;
     
     if (!formData.captchaInput.trim()) {
       newErrors.captcha = 'Captcha belum diisi';
